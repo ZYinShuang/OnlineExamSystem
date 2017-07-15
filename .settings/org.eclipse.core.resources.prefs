@@ -1,0 +1,11 @@
+eclipse.preferences.version=1
+encoding//WebRoot/Question/ProblemUpload.jsp=UTF-8
+encoding//WebRoot/User/PersonShow.jsp=UTF-8
+encoding//WebRoot/User/PersonUpdate.jsp=UTF-8
+encoding//WebRoot/WEB-INF/login1.jsp=UTF-8
+encoding//WebRoot/login.jsp=UTF-8
+encoding//src/com/jereh/controller/UserController.java=UTF-8
+encoding//src/com/jereh/entity/Score.java=UTF-8
+encoding//src/com/jereh/entity/User.java=UTF-8
+encoding//src/com/jereh/util/HandlerException.java=UTF-8
+encoding/<project>=UTF-8

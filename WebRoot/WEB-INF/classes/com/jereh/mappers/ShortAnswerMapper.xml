@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace对应接口地址 -->
+<mapper namespace="com.jereh.dao.ShortAnswerDao">
+
+	<resultMap type="ShortAnswer" id="shortAnswerList">
+		<id column="id" property="id"/>
+		<result column="course" property="course"/>
+		<result column="title" property="title"/>
+		<result column="nycd" property="nycd"/>
+		<result column="isShow" property="isShow"/>
+		<result column="cStage" property="cStage"/>
+		<result column="anwNum" property="anwNum"/>
+		<result column="aid" property="aid"/>
+		<result column="answer" property="answer"/>
+		<result column="remark" property="remark"/>
+		<result column="nycd_show" property="nycd_show"/>
+		<result column="isShow_show" property="isShow_show"/>
+		<result column="cStage_show" property="cStage_show"/>
+	</resultMap>
+	
+	<select id="serchShortAnswer" resultMap="shortAnswerList" parameterType="Search">
+		SELECT p.*,a.id 'aid',a.answer,a.remark,c.subject 'course',cs.stage 'cStage_show',
+		CASE
+		when p.nycd=1 THEN '简单'
+		when p.nycd=2 THEN '中等'
+		when p.nycd=3 THEN '困难'
+		else '超纲'
+		END as nycd_show,
+		CASE
+		when p.isShow=1 THEN '是'
+		when p.isShow=0 THEN '否'
+		else ' '
+		END as isShow_show
+		
+		FROM problem p
+		LEFT JOIN course c ON c.id=p.cid
+		LEFT JOIN answer a on p.id=a.pid
+		LEFT JOIN coursestage cs ON cs.id=p.cStage
+		WHERE type=#{type}
+		<if test="cid &gt; 0">
+			and p.cid=#{cid}
+		</if>
+		<if test="cStage &gt; 0">
+			and p.cStage=#{cStage}
+		</if>
+		<if test="title!=&apos;&apos;">
+			and p.title like concat(concat('%',#{title}),'%')  
+		</if>
+		<if test="nycd &gt; 0">
+			and p.nycd=#{nycd}
+		</if>
+		<if test="isShow &lt; 2">
+			and p.isShow=#{isShow}
+		</if>
+		ORDER BY p.id DESC
+		LIMIT #{startNum},#{rows}
+	</select>
+	
+	
+	<select id="searchCount" resultType="java.lang.Integer"  parameterType="Search">
+		select count(*) from Problem WHERE type=#{type}
+		<if test="cid &gt; 0">
+			and cid=#{cid}
+		</if>
+		<if test="cStage &gt; 0">
+			and cStage=#{cStage}
+		</if>
+		<if test="title!=&apos;&apos;">
+			and title like concat(concat('%',#{title}),'%')  
+		</if>
+		<if test="nycd &gt; 0">
+			and nycd=#{nycd}
+		</if>
+		<if test="isShow &lt; 2">
+			and isShow=#{isShow}
+		</if>
+	</select>
+
+	<update id="updateProblem" parameterType="Problem">
+		update problem set cid=#{cid},cStage=#{cStage},title=#{title},type=#{type},nycd=#{nycd},
+		isShow=#{isShow},anwNum=#{anwNum}
+		where id=#{id}
+	</update>
+
+	<update id="updateAnswer" parameterType="Answer">
+		update answer set answer=#{answer},remark=#{remark},pid=#{pid}
+		where id=#{id}
+	</update>
+	
+	<insert id="insertProblem" parameterType="Problem" useGeneratedKeys="true" keyProperty="id">
+		insert into problem(cid,cStage,title,type,nycd,isShow,anwNum) 
+		values(#{cid},#{cStage},#{title},#{type},#{nycd},#{isShow},#{anwNum})
+	</insert>
+	
+	<insert id="insertAnswer" parameterType="Answer" useGeneratedKeys="true" keyProperty="id">
+		insert into answer(pid,answer,remark)
+		values(#{pid},#{answer},#{remark})
+	</insert>
+	
+	<delete id="delProblem" parameterType="java.lang.String">
+		delete from problem where id in
+		<foreach collection="array" item="id" open="(" separator="," close=")">  
+			#{id}  
+		</foreach> 
+	</delete>
+	
+	<delete id="delAnswer" parameterType="java.lang.String">
+		delete from answer where pid in
+		<foreach collection="array" item="id" open="(" separator="," close=")">  
+			#{id}  
+		</foreach>
+	</delete>
+	
+	<resultMap type="User" id="userList">
+	<id column="id" property="id"/>
+ 	<result column="username" property="username"/>
+ 	<result column="password" property="password"/>
+	<result column="name" property="name"/>
+	<result column="type" property="type"/>
+	<result column="isclass" property="isclass"/>
+	 <result column="is_show" property="is_show"/> 
+	<result column="isShow_show" property="isShow_show"/>
+	<result column="istype" property="istype"/>
+	</resultMap>
+	
+	<!--导入班级表  -->
+	<insert id="insertClass" parameterType="User" useGeneratedKeys="true" keyProperty="id">
+		insert into user(username,password,name,type,is_show,isclass) 
+		values(#{username},#{password},#{name},#{type},#{is_show},#{isclass})
+	</insert>
+	
+	
+
+	
+</mapper> 

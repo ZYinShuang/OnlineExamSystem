@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace对应接口地址 -->
+<mapper namespace="com.jereh.dao.StudentDao">
+
+	<resultMap type="Student" id="studentList">
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="isShow" property="isShow"/>
+		<result column="isShow_show" property="isShow_show"/>
+	</resultMap>
+	
+	<select id="showStudentList" resultMap="studentList">
+		select *,
+		CASE
+		when isShow=1 then "是"
+		when isShow=0 then "否"
+		end as "isShow_show"
+		from student
+	</select>
+	
+	
+	<insert id="insertStudent" parameterType="Student" useGeneratedKeys="true" keyProperty="id">
+		insert into student(name,isShow)
+		values(#{name},#{isShow})
+	
+	</insert>
+	
+	
+	<insert id="insertCourseStage" parameterType="CourseStage" useGeneratedKeys="true" keyProperty="id">
+		insert into coursestage(cid,stage,isShow)
+		values(#{cid},#{stage},#{isShow})
+	</insert>
+	
+	
+	
+	
+	
+	<delete id="delStudent" parameterType="java.lang.String">
+		delete from student where id in
+		<foreach collection="array" item="id" open="(" separator="," close=")">  
+			#{id}  
+		</foreach> 
+	</delete>
+	
+	<select id="searchStudent" resultType="java.lang.Integer"  parameterType="Search">
+		select count(*) from student WHERE 1=1
+		<if test="title!=&apos;&apos;">
+			and name like concat(concat('%',#{title}),'%')  
+		</if>
+		<if test="isShow &lt; 2">
+			and isShow=#{isShow}
+		</if>
+	</select>
+	
+	
+	<update id="updateStudent" parameterType="Student">
+		update student set name=#{name},isShow=#{isShow}
+		where id=#{id}
+	</update>
+
+	<update id="updateCourseStage" parameterType="CourseStage">
+		update coursestage set cid=#{cid},stage=#{stage},isShow=#{isShow}
+		where id=#{id}
+	</update>
+	
+
+</mapper>

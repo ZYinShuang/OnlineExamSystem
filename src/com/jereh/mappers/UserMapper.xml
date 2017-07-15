@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace对应接口地址 -->
+<mapper namespace="com.jereh.dao.UserDao">
+
+	<!-- <select id="findUser" parameterType="User" resultType="User">
+		select * from user 
+		<where>
+			<if test="id>0">
+				and id=#{id}
+			</if>
+			<if test="name!=null">
+				and name=#{name}
+			</if>
+			<if test="pwd!=null">
+				and pwd=#{pwd}
+			</if>
+		</where>
+	</select> -->
+	
+	<resultMap type="User" id="userList">
+	<id column="id" property="id"/>
+ 	<result column="username" property="username"/>
+ 	<result column="password" property="password"/>
+	<result column="name" property="name"/>
+	<result column="type" property="type"/>
+	<result column="isclass" property="isclass"/>
+	 <result column="is_show" property="is_show"/> 
+	<result column="isShow_show" property="isShow_show"/>
+	<result column="istype" property="istype"/>
+	</resultMap>
+	
+	<resultMap type="Score" id="scorelist">
+	
+ 	<result column="paperId" property="paperId"/>
+ 	<result column="studentId" property="studentId"/>
+	<result column="type" property="type"/>
+	<result column="score" property="score"/>
+	
+	</resultMap>
+	
+	<insert id="insertUsers" parameterType="java.util.Map">
+	INSERT INTO user (username,password,name,type,is_show,isclass) VALUES (#{username},#{password},#{name},#{type},#{is_show},#{isclass})
+	</insert>
+	
+	
+	
+	<delete id="deletUsers" parameterType="java.lang.String">
+		delete from user where id in
+		<foreach collection="array" item="id" open="(" separator="," close=")">  
+			#{id}  
+		</foreach> 
+	</delete>
+	
+	
+	<update id="updateUsers" parameterType="User">
+		update user set username=#{username},password=#{password},name=#{name},type=#{type},is_show=#{is_show},isclass=#{isclass}
+		where id=#{id}
+	</update>
+	
+	<update id="changePWD" parameterType="User">
+		update user set password=#{password}
+		where username=#{username}
+	</update>
+	
+	
+	
+	
+	 <select id="searchCount" resultType="java.lang.Integer"  parameterType="Search">
+		select count(*) from user WHERE 1=1
+		<if test="sIs_show &lt; 2">
+			and is_show = #{sIs_show}
+		</if>
+		
+		<if test="sType &lt; 4">
+			and type = #{sType}
+		</if>
+		
+		<if test="sUserName!=&apos;&apos;">
+			and username like concat(concat('%',#{sUserName}),'%') 
+		</if>
+		
+		<if test="sName!=&apos;&apos;">
+			and name like concat(concat('%',#{sName}),'%') 
+		</if>
+		
+		<if test="isclass!=&apos;&apos;">
+			and isclass like concat(concat('%',#{isclass}),'%') 
+		</if>
+		
+	</select> 
+  
+  
+  <select id="getUSerByUSernameAndPassword" resultType="User">
+    select * from user where username=#{0} and password=#{1}
+  </select>
+  
+  <select id="showUserList" resultMap="userList" parameterType="Search">
+	  	select * ,
+ 	 	CASE 
+  		when is_show=1 then "是"
+  		when is_show=0 then "否"
+  		end as "isShow_show",
+  		CASE
+  		when type = 1 then "管理员"
+  		when type = 2 then "教员"
+  		when type = 3 then "学生"
+  		end as "istype"
+   		from user
+   		where 1=1
+   		
+		
+   		<if test="sIs_show &lt; 2">
+			and is_show = #{sIs_show}
+		</if>
+		
+		<if test="sType &lt; 4">
+			and type = #{sType}
+		</if>
+		
+		<if test="sUserName!=&apos;&apos;">
+			and username like concat(concat('%',#{sUserName}),'%') 
+		</if>
+		
+		<if test="sName!=&apos;&apos;">
+			and name like concat(concat('%',#{sName}),'%') 
+		</if>
+		
+		<if test="isclass!=&apos;&apos;">
+			and isclass like concat(concat('%',#{isclass}),'%') 
+		</if>
+		
+		ORDER BY id DESC
+		
+		<if test="rows &gt; -1">
+			LIMIT #{startNum},#{rows}
+		</if>
+		
+  
+  </select>
+  
+ <!--  <select id="showClass" resultMap="userList">
+		
+	</select> -->
+	
+	 <select id="showClass" resultMap="userList">
+		select DISTINCT isclass from `user`
+	</select> 
+	
+	 <select id="showTeacher" resultMap="userList">
+		select name  from `user` where type = 2
+	</select> 
+	
+	
+	<!--查询分数  -->
+	<select id="showScore" resultType="java.lang.String">
+	select score from studentscore
+		where paperId = #{paperId}
+		and  studentId = #{studentId}
+		and	 type = 0 
+	</select>
+	
+	
+	<!-- 成绩查询查询卷子 -->
+	<select id="checkPaper"  parameterType="Score"  resultMap="scorelist" >
+	select * from studentscore
+		where  studentId = #{studentId}
+		and	 type = 0 
+		<if test="paperId!=&apos;&apos;">
+			and paperId = #{paperId} 
+		</if>
+	</select>
+	 
+</mapper>
+	

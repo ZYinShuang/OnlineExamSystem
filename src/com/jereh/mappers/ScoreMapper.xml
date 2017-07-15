@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jereh.dao.StudentScoreDao">
+    <resultMap id="BaseResultMap" type="com.jereh.entity.StudentScore">
+		<result column="paperId"   property="paperId"   jdbcType="VARCHAR" />
+		<result column="studentId" property="studentId" jdbcType="VARCHAR" />
+		<result column="studentName" property="studentName" jdbcType="VARCHAR" />
+		<result column="s_score"   property="s_score"     jdbcType="INTEGER" />
+		<result column="m_score"   property="m_score"     jdbcType="INTEGER" />
+		<result column="j_score"   property="j_score"     jdbcType="INTEGER" />
+		<result column="f_score"   property="f_score"     jdbcType="INTEGER" />
+		<result column="a_score"   property="a_score"     jdbcType="INTEGER" />
+		<result column="sum_score"   property="sum_score"     jdbcType="INTEGER" />
+		
+	</resultMap>
+	<resultMap id="PaperSMMap1" type="com.jereh.entity.PaperTest">
+		<result column="type"  property="type"  jdbcType="INTEGER" />
+		<result column="title" property="title" jdbcType="VARCHAR" />
+		<result column="item"  property="item"  jdbcType="VARCHAR" />
+		<result column="sAnswer"  property="sAnswer"  jdbcType="VARCHAR" />
+		<result column="rAnswer"  property="rAnswer"  jdbcType="VARCHAR" />
+		<result column="mark"  property="mark"  jdbcType="INTEGER"/>
+		<result column="problemId"  property="pid"  jdbcType="INTEGER"/>
+	</resultMap>
+	<select id="selectList" resultMap="BaseResultMap" parameterType="SearchPaper" >
+				select DISTINCT paperId,
+					 studentId,
+					 (select name
+					 		 from user u
+					 		 where u.id=a.studentId) studentName,
+					 (select score 
+							FROM studentScore 
+				     WHERE paperId =a.paperId 
+						   and studentId = a.studentId
+							 and type = 1 ) s_score,
+						(select score 
+							FROM studentScore 
+				     WHERE paperId =a.paperId 
+						   and studentId = a.studentId
+							 and type = 2 ) m_score,
+						(select score 
+							FROM studentScore 
+				     WHERE paperId =a.paperId 
+						   and studentId = a.studentId
+							 and type = 3 ) j_score,	
+						(select score 
+							FROM studentScore 
+				     WHERE paperId =a.paperId 
+						   and studentId = a.studentId
+							 and type = 4 ) f_score,	
+						(select score 
+							FROM studentScore 
+				     WHERE paperId =a.paperId 
+						   and studentId = a.studentId
+							 and type = 5 ) a_score,	
+						(select score 
+							FROM studentScore 
+				     WHERE paperId =a.paperId 
+						   and studentId = a.studentId
+							 and type = 0 ) sum_score
+							 
+						
+							 
+      				from studentScore a		
+      				
+      		
+      			  where a.paperId = #{paperId}  
+      			  <!-- LIMIT #{startNumber},#{rows} -->
+ 	</select>
+	
+	<select id="searchCount" resultType="java.lang.Integer">
+		select count(*) from studentScore 
+		where type = 0
+	</select>
+	<select id="selectPagerJFA" resultMap="PaperSMMap1" parameterType="java.util.Map">
+				select 
+					  problem.type,
+					  problem.title,
+					  paperdetail.mark,
+					  paperdetail.problemId ,
+					  studentanswer.answer  sAnswer,
+				      answer.answer  rAnswer
+				from paperdetail,
+					   problem,
+					   studentanswer ,
+				       answer
+				where paperdetail.paperId   = #{paperId}
+				  and paperdetail.problemId = problem.id
+				  and paperdetail.paperId   = studentanswer.paperId
+				  and paperdetail.problemId = studentanswer.problemId
+				  and studentanswer.studentId = #{studentId}
+				  and paperdetail.problemId = answer.pid
+				  and problem.type in ('4','5') 
+				ORDER BY problem.type
+	</select>
+	<insert id="insertScore" parameterType="StudentScore">
+		insert into answer(paperId,studentId,type,)
+		values(#{paperId},#{studentId},#{type},#{score})
+	</insert>
+	
+	<update id="updateTJ" parameterType="TJscore">
+		update studentScore 
+		   set score    = #{fileScore}
+		where paperId  	= #{paperId}
+		  and studentId = #{studentId}
+		  and type      = '4'
+	</update>
+	<update id="updateTJ2" parameterType="TJscore">
+		update studentScore 
+		   set score    = #{shortScore}
+		where paperId  	= #{paperId}
+		  and studentId = #{studentId}
+		  and type      = '5'
+	</update>
+	
+		<insert id="insertTJ" parameterType="TJscore">
+		insert into studentscore(paperId,studentId,type,score) values(#{paperId},#{studentId},4,#{fileScore})
+	</insert>
+	<insert id="insertTJ2" parameterType="TJscore">
+				insert into studentscore(paperId,studentId,type,score) values(#{paperId},#{studentId},5,#{shortScore})
+
+	</insert>
+	<select id="selectTJ"   parameterType="TJscore" resultType="java.lang.String">
+	select score from studentscore
+		where type = 4 
+		and   studentId = #{studentId}
+		and	  paperId = #{paperId}
+	</select>
+	
+	
+	
+	
+	
+	
+	<!--计算总分数  -->
+	<insert id="calAllScore" parameterType="AllScore" >
+	insert into studentscore(paperId,studentId,type,score) values(#{arrpid},#{arrsid},0,#{allscore})
+	
+	</insert>
+	<select id="selectAllScore" parameterType="AllScore" resultType="java.lang.Integer">
+	select score from studentscore
+		where type = 0
+		and   studentId = #{arrsid}
+		and	  paperId = #{arrpid}
+		
+	</select>
+	
+	<update id="updateAllScore" parameterType="AllScore">
+	update studentscore
+		set score = #{allscore}
+		where type = 0
+		and   studentId = #{arrsid}
+		and	  paperId = #{arrpid} 
+	
+	</update>
+	
+	 
+	
+
+</mapper> 

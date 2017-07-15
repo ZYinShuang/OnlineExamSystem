@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jereh.dao.PaperCreateDao">
+	<resultMap id="BaseResultMap" type="com.jereh.entity.PaperHead">
+		<id column="paperId" property="paperId" />
+		<result column="isclass" property="isclass" jdbcType="VARCHAR" />
+		<result column="paperName" property="paperName" jdbcType="VARCHAR" />
+		<result column="stage"     property="stage"     jdbcType="VARCHAR" />
+		<result column="state"     property="state"     jdbcType="VARCHAR" />
+		<result column="isstate"   property="isstate"   jdbcType="VARCHAR" />
+		
+		<result column="subject"   property="subject"   jdbcType="VARCHAR" />
+		<result column="examTime"  property="examTime"  jdbcType="VARCHAR"/>
+	</resultMap>
+	<resultMap id="PaperSMMap" type="com.jereh.entity.PaperTest">
+		<result column="type"  property="type"  jdbcType="INTEGER" />
+		<result column="title" property="title" jdbcType="VARCHAR" />
+		<result column="item"  property="item"  jdbcType="VARCHAR" />
+		<result column="mark"  property="mark"  jdbcType="INTEGER"/>
+		<result column="problemId"  property="pid"  jdbcType="INTEGER"/>
+	</resultMap>
+	<resultMap id="PaperType" type="com.jereh.entity.PaperTest">
+		<result column="type"  property="type"  jdbcType="INTEGER" />
+		<result column="mark"  property="mark"  jdbcType="INTEGER"/>
+		<result column="ct"    property="ct"  jdbcType="INTEGER"/>
+	</resultMap>
+	<!--添加数据 -->
+	<insert id="insert" parameterType="PaperHead">
+		insert into paperhead values
+		(#{paperId},#{courseId},#{courseStage},#{paperName},1,#{examTime},#{isclass},#{name})
+	</insert>
+	
+	<!--删除studentanswer数据  -->
+	<delete id="delAnswer" parameterType="StudentAnswer">
+		delete from studentAnswer where studentId = #{studentId}and paperId = #{paperId}
+		
+	</delete>
+	
+	<!--删除studentscore数据  -->
+	<delete id="delScore" parameterType="StudentAnswer">
+		delete from studentscore where studentId = #{studentId} and paperId = #{paperId}
+		
+	</delete>
+	
+	
+	
+	<!--添加数据 -->
+	<insert id="insertAnswer" parameterType="StudentAnswer">
+		
+		insert into studentAnswer values
+		(#{paperId},#{studentId},#{problemId},#{answer},#{isRight})
+	</insert>
+	<select id="selectProblem" statementType="CALLABLE"
+		parameterType="PaperCallOption" resultType="java.lang.String">
+   <![CDATA[
+	  {call INSERT_PROBLEM(#{paperId,mode=IN,jdbcType=VARCHAR},
+	  					   #{courseId,mode=IN,jdbcType=INTEGER},
+	  					   #{courseStage,mode=IN,jdbcType=INTEGER},
+	  					   #{pType,mode=IN,jdbcType=INTEGER},
+	  					   #{nd_e_number,mode=IN,jdbcType=INTEGER},
+	  					   #{nd_m_number,mode=IN,jdbcType=INTEGER},
+	  					   #{nd_d_number,mode=IN,jdbcType=INTEGER},
+	  					   #{point,mode=IN,jdbcType=INTEGER},
+	  					   #{result, mode=OUT,jdbcType=VARCHAR})}
+	]]>
+	</select>
+   <select id="calcPaper" statementType="CALLABLE"
+		parameterType="java.lang.String" resultType="java.lang.String">
+   <![CDATA[
+	  {call CALCSCORE(#{paperId,mode=IN,jdbcType=VARCHAR},
+	  				  #{result, mode=OUT,jdbcType=VARCHAR})}
+	]]>
+	</select>
+	<!--按页查询 -->
+	<!--考试展示  -->
+	<select id="selectPage" resultMap="BaseResultMap" parameterType="IsClass">
+		select paperhead.paperId,
+			   course.subject,
+		       coursestage.stage,
+			   paperhead.paperName,
+			   paperhead.examTime ,
+			   paperhead.isclass,
+			    paperhead.name,
+			   paperhead.state,
+			   CASE
+			   when paperhead.state = 1 then "启用"
+			   when paperhead.state = 0 then "停用"
+			   end as "isstate"
+		from paperhead,
+				 course,
+				 coursestage 	
+		where paperhead.courseId    = course.id
+		  and paperhead.courseStage = coursestage.id
+		 
+		  
+		  
+		<!-- <if test="isclass!=&apos;&apos;">
+			and isclass like concat(concat('%',#{isclass}),'%') 
+		</if>
+		 -->
+		
+		
+		   LIMIT #{from} , #{rows}
+	</select>
+	
+	
+	
+	<select id="selectList" resultMap="BaseResultMap" parameterType="IsClass">
+		select paperhead.paperId,
+			   course.subject,
+		       coursestage.stage,
+			   paperhead.paperName,
+			   paperhead.examTime ,
+			   paperhead.isclass,
+			    paperhead.name,
+			   paperhead.state,
+			    CASE
+			   when paperhead.state = 1 then "启用"
+			   when paperhead.state = 0 then "停用"
+			   end as "isstate"
+		from paperhead,
+				 course,
+				 coursestage 	
+		where paperhead.courseId    = course.id
+		  and paperhead.courseStage = coursestage.id
+		 and  paperhead.state = 1
+		  
+		  
+		 <if test="isclass !=&apos;&apos;">
+			and isclass =#{isclass}
+		</if>
+		
+		
+		 LIMIT #{from} , #{rows}
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+	<!--阅卷  -->
+	<select id="selectPageT" resultMap="BaseResultMap" parameterType="IsClass">
+		select paperhead.paperId,
+			   course.subject,
+		       coursestage.stage,
+			   paperhead.paperName,
+			   paperhead.examTime ,
+			   paperhead.isclass,
+			   paperhead.name,
+			   paperhead.state
+		from paperhead,
+				 course,
+				 coursestage 	
+		where paperhead.courseId    = course.id
+		  and paperhead.courseStage = coursestage.id
+		  
+		
+		
+		<if test="type == 2">
+			and name = #{name}
+		</if>
+		
+		   LIMIT #{from} , #{rows}
+	</select>
+	
+	
+	
+	
+	<select id="selectPaper" resultType="PaperHead" parameterType="java.lang.String">
+			select paperhead.paperId,
+				   course.subject,
+			       coursestage.stage,
+				   paperhead.paperName,
+				   paperhead.examTime, 
+				   paperhead.isclass,
+				   paperhead.name
+			from   paperhead,
+			       course,
+				   coursestage 	
+			where paperhead.courseId = course.id
+			  and paperhead.courseStage = coursestage.id
+			  and paperhead.paperId = #{paperId}
+			
+	</select>
+	<select id="selectTypeCt" resultMap="PaperType" parameterType="java.lang.String">
+			select type,
+			       COUNT(1) ct ,
+				   MIN(mark) mark
+			from paperdetail ,problem
+			where paperdetail.paperId   = #{paperId}
+			and paperdetail.problemId = problem.id
+			group by type
+	</select>
+	<select id="selectSingleAndMuti" resultMap="PaperSMMap" parameterType="java.lang.String">
+			select 
+					problem.type,
+					problem.title,
+			        optionItem.item,
+					paperdetail.mark,
+					paperdetail.problemId   
+			from paperdetail,
+				   problem, 
+					(select pid,
+						group_concat('#@#',`option`) item
+					from `option` 
+					group by pid) optionItem
+			where paperdetail.paperId   = #{paperId}
+			  and paperdetail.problemId = problem.id
+			  and problem.id = optionItem.pid
+			ORDER BY problem.type
+	</select>
+	<select id="selectJFA" resultMap="PaperSMMap" parameterType="java.lang.String">
+			select 
+				  problem.type,
+				  problem.title,
+				  '' as   item,
+				  paperdetail.mark,
+				  paperdetail.problemId   
+			from paperdetail,
+				   problem 
+			where paperdetail.paperId   = #{paperId}
+			  and paperdetail.problemId = problem.id
+			  and problem.type in ('3','4','5') 
+			ORDER BY problem.type
+	</select>
+	<!--查询数据数量 -->
+	<select id="selectCount" resultType="INTEGER">
+		select count(1) count from paperhead
+	</select>
+	
+	
+	<select id="searchClass" resultMap="BaseResultMap">
+		select  isclass from paperhead
+	</select> 
+	
+	<select id="searchTeacher" resultMap="BaseResultMap">
+		select  name from paperhead
+	</select> 
+	
+	<update id="closePaper">
+	update paperhead
+		set state = 0
+		where paperId = #{paperId}
+		
+	
+	</update>
+	
+	<update id="openPaper">
+	update paperhead
+		set state = 1
+		where paperId = #{paperId}
+		
+	
+	</update>
+	
+	
+	<select id="rePaper" resultType="INTEGER" >
+	
+	select count(1)  from studentanswer
+	where paperId = #{0} and studentId = #{1}
+	</select>
+	
+	
+</mapper>

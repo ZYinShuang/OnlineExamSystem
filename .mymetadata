@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="NewsPlatform"
+  id="myeclipse.1476406979122"
+  context-root="/NewsPlatform"
+  j2ee-spec="6.0"
+  archive="NewsPlatform.war">
+  <attributes>
+    <attribute name="webrootdir" value="WebRoot" />
+  </attributes>
+</project-module>
+

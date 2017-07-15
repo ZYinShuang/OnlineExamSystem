@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace对应接口地址 -->
+<mapper namespace="com.jereh.dao.CourseDao">
+
+	<resultMap type="Course" id="courseList">
+		<id column="id" property="id"/>
+		<result column="subject" property="course"/>
+		<result column="title" property="title"/>
+		<result column="isShow" property="isShow"/>
+		<result column="isShow_show" property="isShow_show"/>
+	</resultMap>
+
+	<select id="courseList" resultMap="courseList">
+		select * from course where isShow=1
+	</select>
+	
+	
+	<resultMap type="CourseStage" id="courseStageList">
+		<id column="id" property="id"/>
+		<result column="cid" property="cid"/>
+		<result column="stage" property="stage"/>
+		<result column="isShow" property="isShow"/>
+	</resultMap>
+	
+	<select id="courseStageList" resultMap="courseStageList">
+		select * from courseStage where cid=#{0} and isShow=1 ORDER BY id DESC
+	</select>
+	
+	
+	<select id="showCourseList" resultMap="courseList" parameterType="Search">
+		select *,
+		CASE
+		when isShow=1 then "是"
+		when isShow=0 then "否"
+		end as "isShow_show"
+		from course
+		where 1=1
+		<if test="title!=&apos;&apos;">
+			and subject like concat(concat('%',#{title}),'%')  
+		</if>
+		<if test="isShow &lt; 2">
+			and isShow=#{isShow}
+		</if>
+	</select>
+	
+	<select id="searchCount" resultType="java.lang.Integer"  parameterType="Search">
+		select count(*) from course WHERE 1=1
+		<if test="title!=&apos;&apos;">
+			and subject like concat(concat('%',#{title}),'%')  
+		</if>
+		<if test="isShow &lt; 2">
+			and isShow=#{isShow}
+		</if>
+	</select>
+	
+	<select id="showCourseStageList" resultMap="courseStageList" parameterType="java.lang.Integer">
+		select cs.*,
+		CASE
+		when cs.isShow=1 then "是"
+		when cs.isShow=0 then "否"
+		end as "isShow_show"
+		from coursestage cs
+		where cid=#{cid}
+	</select>
+	
+	<insert id="insertCourse" parameterType="Course" useGeneratedKeys="true" keyProperty="id">
+		insert into course(subject,isShow) 
+		values(#{course},#{isShow})
+	</insert>
+	
+	<insert id="insertCourseStage" parameterType="CourseStage" useGeneratedKeys="true" keyProperty="id">
+		insert into coursestage(cid,stage,isShow)
+		values(#{cid},#{stage},#{isShow})
+	</insert>
+	
+	<update id="updateCourse" parameterType="Course">
+		update course set subject=#{course},isShow=#{isShow}
+		where id=#{id}
+	</update>
+
+	<update id="updateCourseStage" parameterType="CourseStage">
+		update coursestage set cid=#{cid},stage=#{stage},isShow=#{isShow}
+		where id=#{id}
+	</update>
+	
+	
+	<delete id="delCourse" parameterType="java.lang.String">
+		delete from course where id in
+		<foreach collection="array" item="id" open="(" separator="," close=")">  
+			#{id}  
+		</foreach> 
+	</delete>
+	
+	<delete id="delCourseStage" parameterType="java.lang.String">
+		delete from coursestage where cid in
+		<foreach collection="array" item="id" open="(" separator="," close=")">  
+			#{id}  
+		</foreach>
+	</delete>
+	
+	
+	
+	
+
+	
+</mapper> 
